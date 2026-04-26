@@ -29,6 +29,7 @@ export default function Dashboard() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [monthlyBudget, setMonthlyBudget] = useState(15000)
   const [showForm, setShowForm] = useState(false)
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState({
     title: '',
@@ -87,6 +88,26 @@ export default function Dashboard() {
     await supabase.from('expenses').delete().eq('id', id)
     setExpenses(expenses.filter(e => e.id !== id))
   }
+  
+  const editExpense = async () => {
+  if (!editingExpense || !form.title || !form.amount) return
+  const { error } = await supabase
+    .from('expenses')
+    .update({
+      title: form.title,
+      amount: parseFloat(form.amount),
+      category: form.category,
+      date: form.date,
+      description: form.description,
+    })
+    .eq('id', editingExpense.id)
+  if (!error) {
+    await fetchExpenses(user.id)
+    setEditingExpense(null)
+    setShowForm(false)
+    setForm({ title: '', amount: '', category: 'Food', date: new Date().toISOString().split('T')[0], description: '' })
+  }
+}
 
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0)
   const remaining = monthlyBudget - totalSpent
@@ -213,8 +234,21 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-semibold text-red-400">-PKR {expense.amount.toLocaleString()}</p>
-                      <button onClick={() => deleteExpense(expense.id)}
-                        className="text-xs text-gray-600 hover:text-red-400">delete</button>
+                      <div className="flex gap-2">
+                        <button onClick={() => {
+                            setEditingExpense(expense)
+                            setForm({
+                                title: expense.title,
+                                amount: expense.amount.toString(),
+                                category: expense.category,
+                                date: expense.date,
+                                description: expense.description || '',
+                            })
+                            setShowForm(true)
+                        }} className="text-xs text-gray-600 hover:text-blue-400">edit</button>
+                        <button onClick={() => deleteExpense(expense.id)}
+                            className="text-xs text-gray-600 hover:text-red-400">delete</button>
+                    </div>
                     </div>
                   </div>
                 )
@@ -236,7 +270,7 @@ export default function Dashboard() {
       {showForm && (
         <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-50">
           <div className="bg-gray-900 rounded-t-3xl p-6 w-full max-w-lg border-t border-gray-800">
-            <h2 className="text-lg font-bold mb-6">Add Expense</h2>
+            <h2 className="text-lg font-bold mb-6">{editingExpense ? 'Edit Expense' : 'Add Expense'}</h2>
             <div className="space-y-4">
               <input placeholder="Title (e.g. Lunch at cafeteria)"
                 value={form.title}
@@ -262,13 +296,13 @@ export default function Dashboard() {
                 className="w-full bg-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-500 border border-gray-700" />
             </div>
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setShowForm(false)}
+              <button onClick={() => { setShowForm(false); setEditingExpense(null); setForm({ title: '', amount: '', category: 'Food', date: new Date().toISOString().split('T')[0], description: '' }) }}
                 className="flex-1 bg-gray-800 rounded-xl py-3 text-gray-400">
                 Cancel
               </button>
-              <button onClick={addExpense}
+              <button onClick={editingExpense ? editExpense : addExpense}
                 className="flex-1 bg-green-500 rounded-xl py-3 text-white font-semibold">
-                Add Expense
+                {editingExpense ? 'Save Changes' : 'Add Expense'}
               </button>
             </div>
           </div>
