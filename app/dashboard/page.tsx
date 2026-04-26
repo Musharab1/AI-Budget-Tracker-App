@@ -62,21 +62,29 @@ export default function Dashboard() {
   }
 
   const addExpense = async () => {
-    if (!form.title || !form.amount) return
-    const { error } = await supabase.from('expenses').insert({
-      user_id: user.id,
-      title: form.title,
-      amount: parseFloat(form.amount),
-      category: form.category,
-      date: form.date,
-      description: form.description,
-    })
-    if (!error) {
-      await fetchExpenses(user.id)
-      setForm({ title: '', amount: '', category: 'Food', date: new Date().toISOString().split('T')[0], description: '' })
-      setShowForm(false)
-    }
+  if (!form.title || !form.amount) return
+  
+  console.log('Adding expense...', { user_id: user.id, ...form })
+  
+  const { data, error } = await supabase.from('expenses').insert({
+    user_id: user.id,
+    title: form.title,
+    amount: parseFloat(form.amount),
+    category: form.category,
+    date: form.date,
+    description: form.description,
+  })
+  
+  console.log('Result:', { data, error })
+  
+  if (!error) {
+    await fetchExpenses(user.id)
+    setForm({ title: '', amount: '', category: 'Food', date: new Date().toISOString().split('T')[0], description: '' })
+    setShowForm(false)
+  } else {
+    alert('Error: ' + error.message)
   }
+}
 
   const deleteExpense = async (id: string) => {
     await supabase.from('expenses').delete().eq('id', id)
