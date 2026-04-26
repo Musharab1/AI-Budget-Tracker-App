@@ -64,7 +64,6 @@ export default function Dashboard() {
   const addExpense = async () => {
   if (!form.title || !form.amount) return
   
-  console.log('Adding expense...', { user_id: user.id, ...form })
   
   const { data, error } = await supabase.from('expenses').insert({
     user_id: user.id,
@@ -74,9 +73,7 @@ export default function Dashboard() {
     date: form.date,
     description: form.description,
   })
-  
-  console.log('Result:', { data, error })
-  
+    
   if (!error) {
     await fetchExpenses(user.id)
     setForm({ title: '', amount: '', category: 'Food', date: new Date().toISOString().split('T')[0], description: '' })
@@ -129,12 +126,12 @@ export default function Dashboard() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-gray-400 text-sm">Total Spent</p>
-              <p className="text-3xl font-bold text-white">₨{totalSpent.toLocaleString()}</p>
+              <p className="text-3xl font-bold text-white">PKR {totalSpent.toLocaleString()}</p>
             </div>
             <div className="text-right">
               <p className="text-gray-400 text-sm">Remaining</p>
               <p className={`text-xl font-bold ${remaining < 0 ? 'text-red-400' : 'text-green-400'}`}>
-                ₨{remaining.toLocaleString()}
+                PKR {remaining.toLocaleString()}
               </p>
             </div>
           </div>
@@ -148,7 +145,7 @@ export default function Dashboard() {
           </div>
           <div className="flex justify-between text-xs text-gray-400">
             <span>{percentage.toFixed(0)}% used</span>
-            <span>Budget: ₨{monthlyBudget.toLocaleString()}</span>
+            <span>Budget: PKR {monthlyBudget.toLocaleString()}</span>
           </div>
 
           {/* Budget warning */}
@@ -181,7 +178,7 @@ export default function Dashboard() {
                   <div className="flex-1">
                     <div className="flex justify-between text-sm mb-1">
                       <span>{cat.name}</span>
-                      <span className="text-gray-400">₨{cat.total.toLocaleString()}</span>
+                      <span className="text-gray-400">PKR {cat.total.toLocaleString()}</span>
                     </div>
                     <div className="w-full bg-gray-800 rounded-full h-1.5">
                       <div className={`h-1.5 rounded-full ${cat.color}`}
@@ -215,7 +212,7 @@ export default function Dashboard() {
                       <p className="text-xs text-gray-500">{expense.category} · {expense.date}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold text-red-400">-₨{expense.amount.toLocaleString()}</p>
+                      <p className="text-sm font-semibold text-red-400">-PKR {expense.amount.toLocaleString()}</p>
                       <button onClick={() => deleteExpense(expense.id)}
                         className="text-xs text-gray-600 hover:text-red-400">delete</button>
                     </div>
@@ -245,7 +242,7 @@ export default function Dashboard() {
                 value={form.title}
                 onChange={e => setForm({ ...form, title: e.target.value })}
                 className="w-full bg-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-500 border border-gray-700" />
-              <input type="number" placeholder="Amount in ₨"
+              <input type="number" placeholder="Amount in PKR "
                 value={form.amount}
                 onChange={e => setForm({ ...form, amount: e.target.value })}
                 className="w-full bg-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-500 border border-gray-700" />
