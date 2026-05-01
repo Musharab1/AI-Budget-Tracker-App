@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💰 AI Budget Tracker App
 
-## Getting Started
+## 📖 Description
 
-First, run the development server:
+**AI Budget Tracker** is a smart expense management app designed specifically for **university students**.  
+Many students struggle to manage their pocket money and monthly budget — this app solves exactly that problem.  
+With this app, you can log your daily expenses, set a monthly budget, and receive **AI-powered advice** that helps you understand where you are overspending and where you can save.  
+In short — **track your money, smarter with AI!**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- 🤖 **AI Spending Insights** – The app analyzes your expenses and provides smart, personalized financial advice.
+- 📊 **Category-wise Expense Tracking** – Log your expenses across different categories:
+  - 🍔 Food
+  - 🚌 Transport
+  - 🛍️ Shopping
+  - 📚 Uni Supplies
+  - 👥 Socializing
+  - 💸 Other
+- ⚠️ **Budget Warning** – Get real-time alerts when you are approaching your monthly spending limit.
+- 🔐 **Google Login** – Secure, one-click sign-in using your Google account.
+- 📅 **Monthly Summary** – View your complete monthly spending in one place — how much is spent and how much is left.
+- 📱 **Mobile Friendly UI** – Clean, modern dark-themed interface that works great on mobile devices.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🚀 How to Use
 
-To learn more about Next.js, take a look at the following resources:
+**Step 1 — Sign In**  
+Open the app and click the **"Continue with Google"** button. Select your Google account and you are logged in instantly.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Step 2 — Set Your Monthly Budget**  
+On the dashboard, set your **monthly budget** (default: Rs. 15,000). This will be your spending limit for the month.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Step 3 — Add an Expense**  
+Click the **"+ Add Expense"** button and fill in the form:
+- Title (e.g. "Lunch at cafeteria")
+- Amount (e.g. 350)
+- Category (Food, Transport, etc.)
+- Date
+- Description (optional)
 
-## Deploy on Vercel
+**Step 4 — Track Your Spending**  
+The dashboard shows you at a glance:
+- How much you have spent so far
+- How much budget is remaining
+- Breakdown of spending per category
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Step 5 — Get AI Advice**  
+The app automatically analyzes your spending habits and provides **AI-generated tips** — for example, "You are spending a lot on food. Consider cooking at home to save more!"
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 👥 Team Members
+
+| Name | Role |
+|------|------|
+| Musharab Sabeen | Team Member |
+| Haiqa Qaiser | Team Member |
+| Awais Shehzad | Team Member |
+| Aleem Azam Khan | Team Member |
+| Rana Usama Naeem | Team Member |
+
+---
+
+## 📄 License
+
+This project is open-source. Free to use and modify.
