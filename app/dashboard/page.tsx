@@ -31,6 +31,11 @@ export default function Dashboard() {
   const [showForm, setShowForm] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
   const [loading, setLoading] = useState(true)
+  const [aiResponse, setAiResponse] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [showAiChat, setShowAiChat] = useState(false)
+  const [chatQuestion, setChatQuestion] = useState('')
+  const [aiRequestsLeft, setAiRequestsLeft] = useState(5)
   const [form, setForm] = useState({
     title: '',
     amount: '',
@@ -87,6 +92,33 @@ export default function Dashboard() {
   const deleteExpense = async (id: string) => {
     await supabase.from('expenses').delete().eq('id', id)
     setExpenses(expenses.filter(e => e.id !== id))
+  }
+
+  const callAI = async (type: string, question?: string) => {
+  setAiLoading(true)
+  setAiResponse('')
+  try {
+    const res = await fetch('/api/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type,
+        expenses,
+        monthlyBudget,
+        question: question || ''
+      })
+    })
+    const data = await res.json()
+    if (data.error) {
+      setAiResponse(data.error)
+    } else {
+      setAiResponse(data.response)
+      setAiRequestsLeft(prev => Math.max(0, prev - 1))
+    }
+  } catch (error) {
+    setAiResponse('Something went wrong. Please try again.')
+  }
+  setAiLoading(false)
   }
   
   const editExpense = async () => {
@@ -257,7 +289,83 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      {/* AI Advisor Section */}
+<div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+  <div className="flex justify-between items-center mb-4">
+    <div>
+      <h2 className="text-sm font-semibold text-gray-400">AI ADVISOR 🤖</h2>
+      <p className="text-xs text-gray-500 mt-1">{aiRequestsLeft} requests left today</p>
+    </div>
+    <div className="flex gap-2">
+      <button
+        onClick={() => callAI('analysis')}
+        disabled={aiLoading || expenses.length === 0 || aiRequestsLeft === 0}
+        className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs px-3 py-2 rounded-xl">
+        Analyse spending
+      </button>
+      <button
+        onClick={() => callAI('summary')}
+        disabled={aiLoading || expenses.length === 0 || aiRequestsLeft === 0}
+        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs px-3 py-2 rounded-xl">
+        Weekly summary
+      </button>
+    </div>
+  </div>
 
+  {/* AI Response */}
+  {aiLoading && (
+    <div className="bg-gray-800 rounded-xl p-4 text-gray-400 text-sm animate-pulse">
+      AI is thinking...
+    </div>
+  )}
+  {aiResponse && !aiLoading && (
+    <div className="bg-gray-800 rounded-xl p-4 text-gray-200 text-sm leading-relaxed">
+      {aiResponse}
+    </div>
+  )}
+
+  {/* Chat */}
+  <div className="mt-4">
+    <button
+      onClick={() => setShowAiChat(!showAiChat)}
+      className="text-xs text-purple-400 hover:text-purple-300">
+      {showAiChat ? 'Hide chat ↑' : 'Ask AI a question ↓'}
+    </button>
+    {showAiChat && (
+      <div className="mt-3 flex gap-2">
+        <input
+          placeholder="e.g. Where am I overspending?"
+          value={chatQuestion}
+          onChange={e => setChatQuestion(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter' && chatQuestion.trim()) {
+              callAI('chat', chatQuestion)
+              setChatQuestion('')
+            }
+          }}
+          className="flex-1 bg-gray-800 rounded-xl px-4 py-2 text-white text-sm placeholder-gray-500 border border-gray-700"
+        />
+        <button
+          onClick={() => {
+            if (chatQuestion.trim()) {
+              callAI('chat', chatQuestion)
+              setChatQuestion('')
+            }
+          }}
+          disabled={aiLoading || aiRequestsLeft === 0}
+          className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-xl">
+          Ask
+        </button>
+      </div>
+    )}
+  </div>
+
+  {aiRequestsLeft === 0 && (
+    <div className="mt-3 bg-yellow-900/30 border border-yellow-800 rounded-xl p-3 text-yellow-400 text-xs">
+      ⭐ You've used all 5 free AI requests today. Upgrade to Premium for unlimited advice!
+    </div>
+  )}
+</div>
       {/* Add expense button */}
       <div className="fixed bottom-6 right-6">
         <button onClick={() => setShowForm(true)}
