@@ -6,7 +6,7 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!
 })
 
-const DAILY_LIMIT = 5
+const DAILY_LIMIT = 50
 
 async function checkRateLimit(supabase: any, userId: string): Promise<boolean> {
   const today = new Date().toISOString().split('T')[0]
