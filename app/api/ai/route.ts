@@ -114,7 +114,7 @@ Create a brief weekly summary with:
 Keep it under 100 words. Warm, friendly tone. Use "yaar" occasionally.`
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' })
     const result = await model.generateContent(prompt)
     const response = result.response.text()
 
