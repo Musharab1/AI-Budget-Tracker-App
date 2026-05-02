@@ -1,10 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!
-})
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
 const DAILY_LIMIT = 50
 
@@ -116,18 +114,14 @@ Create a brief weekly summary with:
 Keep it under 100 words. Warm, friendly tone. Use "yaar" occasionally.`
     }
 
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 300,
-      messages: [{ role: 'user', content: prompt }]
-    })
-
-    const response = message.content[0].type === 'text' ? message.content[0].text : ''
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const result = await model.generateContent(prompt)
+    const response = result.response.text()
 
     return NextResponse.json({ response })
 
   } catch (error: any) {
     console.error('AI API error:', error)
-    return NextResponse.json({ error: 'AI service error' }, { status: 500 })
+    return NextResponse.json({ error: 'AI service error: ' + error.message }, { status: 500 })
   }
 }
