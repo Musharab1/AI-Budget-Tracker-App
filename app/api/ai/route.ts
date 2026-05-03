@@ -114,7 +114,21 @@ Create a brief weekly summary with:
 3. One specific saving tip for next week
 
 Keep it under 100 words. Warm, friendly tone. Use "yaar" occasionally.`
+
+    } else if (type === 'warning') {
+      prompt = `You are a friendly financial advisor for Pakistani university students.
+
+Student has used ${percentage}% of their monthly budget!
+- Monthly budget: PKR ${monthlyBudget}
+- Total spent: PKR ${totalSpent}
+- Remaining: PKR ${remaining}
+- Breakdown: ${categoryText}
+
+Give ONE specific emergency saving tip they can implement RIGHT NOW.
+Keep it under 50 words. Be direct and friendly. Mention specific PKR amounts.`
+
     }
+    
 
     const completion = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],

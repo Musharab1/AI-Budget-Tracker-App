@@ -205,8 +205,14 @@ export default function Dashboard() {
           {percentage > 80 && (
             <div className="mt-3 bg-red-900/30 border border-red-800 rounded-xl p-3 text-red-400 text-sm">
               ⚠️ You've used {percentage.toFixed(0)}% of your budget!
-            </div>
-          )}
+              <button
+              onClick={() => callAI('warning')}
+              disabled={aiLoading}
+              className="ml-2 text-xs bg-red-800 hover:bg-red-700 text-red-200 px-2 py-1 rounded-lg">
+                Get saving tip
+                </button>
+                </div>
+              )}
 
           {/* Budget setter */}
           <div className="mt-4 flex items-center gap-2">
@@ -380,10 +386,32 @@ export default function Dashboard() {
           <div className="bg-gray-900 rounded-t-3xl p-6 w-full max-w-lg border-t border-gray-800">
             <h2 className="text-lg font-bold mb-6">{editingExpense ? 'Edit Expense' : 'Add Expense'}</h2>
             <div className="space-y-4">
-              <input placeholder="Title (e.g. Lunch at cafeteria)"
+              <div className="relative">
+                <input placeholder="Title (e.g. Lunch at cafeteria)"
                 value={form.title}
-                onChange={e => setForm({ ...form, title: e.target.value })}
+                onChange={async (e) => {
+                  const title = e.target.value
+                  setForm({ ...form, title })
+                  if (title.length > 3) {
+                    clearTimeout((window as any).catTimer)
+                    ;(window as any).catTimer = setTimeout(async () => {
+                      try {
+                        const res = await fetch('/api/ai/categorize', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ title })
+                        })
+                        const data = await res.json()
+                        if (data.category) {
+                          setForm(prev => ({ ...prev, category: data.category }))
+                        }
+                      } catch {}
+                    }, 1000)
+                  }
+                }}
                 className="w-full bg-gray-800 rounded-xl px-4 py-3 text-white placeholder-gray-500 border border-gray-700" />
+                <p className="text-xs text-gray-500 mt-1">Category will be suggested automatically</p>
+                </div>
               <input type="number" placeholder="Amount in PKR "
                 value={form.amount}
                 onChange={e => setForm({ ...form, amount: e.target.value })}
