@@ -1,8 +1,10 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import Groq from 'groq-sdk'
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY!
+})
 
 const DAILY_LIMIT = 50
 
@@ -114,9 +116,13 @@ Create a brief weekly summary with:
 Keep it under 100 words. Warm, friendly tone. Use "yaar" occasionally.`
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' })
-    const result = await model.generateContent(prompt)
-    const response = result.response.text()
+    const completion = await groq.chat.completions.create({
+      messages: [{ role: 'user', content: prompt }],
+      model: 'llama-3.1-8b-instant',
+      max_tokens: 300,
+    })
+
+    const response = completion.choices[0]?.message?.content || ''
 
     return NextResponse.json({ response })
 
