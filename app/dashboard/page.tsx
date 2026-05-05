@@ -1,5 +1,6 @@
 'use client'
 
+import SpendingCharts from './components/spendingcharts'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -161,7 +162,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="bg-gray-900 border-b border-gray-800 px-4 py-4 flex justify-between items-center">
         <div>
-          <h1 className="text-lg font-bold">💰 Budget Tracker</h1>
+          <h1 className="text-lg font-bold"> AI Budget Tracker</h1>
           <p className="text-gray-400 text-xs">
             {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
           </p>
@@ -225,6 +226,9 @@ export default function Dashboard() {
             />
           </div>
         </div>
+
+        {/* Charts */}
+        <SpendingCharts expenses={expenses} />
 
         {/* Category breakdown */}
         {categoryTotals.length > 0 && (
