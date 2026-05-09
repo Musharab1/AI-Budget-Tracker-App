@@ -168,8 +168,23 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <img src={user?.user_metadata?.avatar_url} className="w-8 h-8 rounded-full" />
-          <button onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
+          <div className="flex items-center gap-2">
+            {user?.user_metadata?.avatar_url ? (
+              <img 
+              src={user?.user_metadata?.avatar_url} 
+              className="w-8 h-8 rounded-full"
+              referrerPolicy="no-referrer"
+              />
+            ) : (
+            <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold">
+              {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || '?'}
+              </div>
+            )}
+            <span className="text-gray-400 text-xs hidden sm:block">
+              {user?.user_metadata?.full_name?.split(' ')[0] || 'User'}
+              </span>
+              </div>
+            <button onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
             className="text-gray-400 text-xs hover:text-white">Sign out</button>
         </div>
       </div>
