@@ -26,12 +26,6 @@ const CATEGORY_COLORS: { [key: string]: string } = {
   'Other': '#6B7280',
 }
 
-const barTooltipFormatter = (value: number) => [`PKR ${value}`, 'Spent']
-const pieTooltipFormatter = (value: number) => `PKR ${value}`
-const legendFormatter = (value: string) => (
-  <span style={{ color: '#9ca3af', fontSize: '12px' }}>{value}</span>
-)
-
 export default function SpendingCharts({ expenses }: Props) {
   const getLast7Days = () => {
     const days = []
@@ -43,7 +37,7 @@ export default function SpendingCharts({ expenses }: Props) {
       const total = expenses
         .filter(e => e.date === dateStr)
         .reduce((sum, e) => sum + e.amount, 0)
-      days.push({ day: dayName, amount: total, date: dateStr })
+      days.push({ day: dayName, amount: total })
     }
     return days
   }
@@ -60,6 +54,46 @@ export default function SpendingCharts({ expenses }: Props) {
   const categoryData = getCategoryData()
 
   if (expenses.length === 0) return null
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const CustomBarTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div style={{
+          backgroundColor: '#111827',
+          border: '1px solid #374151',
+          borderRadius: '12px',
+          padding: '8px 12px',
+          color: '#f9fafb',
+          fontSize: '12px'
+        }}>
+          <p>{label}</p>
+          <p style={{ color: '#8B5CF6' }}>PKR {payload[0].value}</p>
+        </div>
+      )
+    }
+    return null
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const CustomPieTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div style={{
+          backgroundColor: '#111827',
+          border: '1px solid #374151',
+          borderRadius: '12px',
+          padding: '8px 12px',
+          color: '#f9fafb',
+          fontSize: '12px'
+        }}>
+          <p>{payload[0].name}</p>
+          <p style={{ color: payload[0].fill }}>PKR {payload[0].value}</p>
+        </div>
+      )
+    }
+    return null
+  }
 
   return (
     <div className="space-y-6">
@@ -81,15 +115,7 @@ export default function SpendingCharts({ expenses }: Props) {
               axisLine={false}
               tickLine={false}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: '#111827',
-                border: '1px solid #374151',
-                borderRadius: '12px',
-                color: '#f9fafb'
-              }}
-              formatter={barTooltipFormatter}
-            />
+            <Tooltip content={<CustomBarTooltip />} />
             <Bar
               dataKey="amount"
               fill="#8B5CF6"
@@ -123,16 +149,12 @@ export default function SpendingCharts({ expenses }: Props) {
                   />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#111827',
-                  border: '1px solid #374151',
-                  borderRadius: '12px',
-                  color: '#f9fafb'
-                }}
-                formatter={pieTooltipFormatter}
+              <Tooltip content={<CustomPieTooltip />} />
+              <Legend
+                formatter={(value) => (
+                  <span style={{ color: '#9ca3af', fontSize: '12px' }}>{value}</span>
+                )}
               />
-              <Legend formatter={legendFormatter} />
             </PieChart>
           </ResponsiveContainer>
         </div>
