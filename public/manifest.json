@@ -1,6 +1,6 @@
 {
-  "name": "AI Budget Tracker",
-  "short_name": "BudgetAI",
+  "name": "Paisavo",
+  "short_name": "Paisavo",
   "description": "Smart money management for university students",
   "start_url": "/",
   "display": "standalone",

@@ -22,7 +22,7 @@ export default function LoginPage() {
         <div className="text-center mb-10">
           <div className="text-5xl mb-4">💰</div>
           <h1 className="text-3xl font-bold text-white mb-2">
-            AI Budget Tracker
+            Paisavo
           </h1>
           <p className="text-gray-400 text-sm">
             Smart money management for university students

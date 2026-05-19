@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Budget Tracker",
+  title: "Paisavo",
   description: "Smart money management for Pakistani university students",
   manifest: '/manifest.json',
   appleWebApp: {
