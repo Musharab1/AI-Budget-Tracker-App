@@ -47,15 +47,29 @@ export default function Dashboard() {
   })
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/'); return }
-      setUser(user)
-      await fetchExpenses(user.id)
-      setLoading(false)
-    }
-    getUser()
-  }, [])
+  const getUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/'); return }
+    setUser(user)
+    await fetchExpenses(user.id)
+    await fetchAiRequestsLeft(user.id)
+    setLoading(false)
+  }
+  getUser()
+}, [])
+
+const fetchAiRequestsLeft = async (userId: string) => {
+  const today = new Date().toISOString().split('T')[0]
+  const { data } = await supabase
+    .from('ai_usage')
+    .select('count')
+    .eq('user_id', userId)
+    .eq('date', today)
+    .single()
+  
+  const used = data?.count || 0
+  setAiRequestsLeft(Math.max(0, 5 - used))
+}
 
   const fetchExpenses = async (userId: string) => {
     const now = new Date()
