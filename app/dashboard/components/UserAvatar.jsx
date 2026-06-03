@@ -16,7 +16,7 @@ export default function UserAvatar({ size = "md" }) {
     : "?";
 
   return (
-    <div className={`relative rounded-full overflow-hidden ${sizes[size]} flex-shrink-0`}>
+    <div className={`relative rounded-full overflow-hidden ${sizes[size]} shrink-0`}>
       {user?.imageUrl ? (
         <img
           src={user.imageUrl}
