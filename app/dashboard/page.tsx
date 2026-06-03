@@ -53,6 +53,7 @@ export default function Dashboard() {
     setUser(user)
     await fetchExpenses(user.id)
     await fetchAiRequestsLeft(user.id)
+    await fetchRecurringExpenses(user.id)
     setLoading(false)
   }
   getUser()
@@ -83,6 +84,75 @@ const fetchAiRequestsLeft = async (userId: string) => {
     if (data) setExpenses(data)
   }
 
+  const [recurringExpenses, setRecurringExpenses] = useState<any[]>([])
+  const [pendingRecurring, setPendingRecurring] = useState<any[]>([])
+  const [showRecurringForm, setShowRecurringForm] = useState(false)
+  const [recurringForm, setRecurringForm] = useState({
+    title: '', amount: '', category: 'Food', day_of_month: 1
+  })
+
+  const fetchRecurringExpenses = async (userId: string) => {
+  const { data } = await supabase
+    .from('recurring_expenses')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+  if (data) {
+    setRecurringExpenses(data)
+    checkPendingRecurring(data, userId)
+  }
+}
+
+const checkPendingRecurring = async (recurring: any[], userId: string) => {
+  const now = new Date()
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+  const { data: thisMonthExpenses } = await supabase
+    .from('expenses')
+    .select('title, amount')
+    .eq('user_id', userId)
+    .gte('date', firstDay)
+
+  const pending = recurring.filter(r => {
+    const alreadyAdded = thisMonthExpenses?.some(
+      e => e.title === r.title && e.amount === r.amount
+    )
+    return !alreadyAdded && now.getDate() >= r.day_of_month
+  })
+  setPendingRecurring(pending)
+}
+
+const confirmRecurring = async (item: any) => {
+  const today = new Date().toISOString().split('T')[0]
+  await supabase.from('expenses').insert({
+    user_id: user.id,
+    title: item.title,
+    amount: item.amount,
+    category: item.category,
+    date: today,
+    description: 'Auto-added from recurring',
+  })
+  await fetchExpenses(user.id)
+  setPendingRecurring(prev => prev.filter(p => p.id !== item.id))
+}
+
+const addRecurring = async () => {
+  if (!recurringForm.title || !recurringForm.amount) return
+  await supabase.from('recurring_expenses').insert({
+    user_id: user.id,
+    title: recurringForm.title,
+    amount: parseFloat(recurringForm.amount),
+    category: recurringForm.category,
+    day_of_month: recurringForm.day_of_month,
+  })
+  setRecurringForm({ title: '', amount: '', category: 'Food', day_of_month: 1 })
+  setShowRecurringForm(false)
+  await fetchRecurringExpenses(user.id)
+}
+
+const deleteRecurring = async (id: string) => {
+  await supabase.from('recurring_expenses').delete().eq('id', id)
+  setRecurringExpenses(prev => prev.filter(r => r.id !== id))
+}
   const addExpense = async () => {
   if (!form.title || !form.amount) return
   
@@ -507,6 +577,126 @@ const fetchHistoryExpenses = async (yearMonth: string) => {
           </div>
         </div>
       )}
+      {/* Pending recurring prompt */}
+{pendingRecurring.length > 0 && (
+  <div className="bg-yellow-900/20 border border-yellow-700 rounded-2xl p-5">
+    <h2 className="text-sm font-semibold text-yellow-400 mb-3">
+      🔄 Recurring Expenses Due
+    </h2>
+    <div className="space-y-3">
+      {pendingRecurring.map(item => {
+        const cat = CATEGORIES.find(c => c.name === item.category)
+        return (
+          <div key={item.id} className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span>{cat?.icon}</span>
+              <div>
+                <p className="text-sm font-medium text-white">{item.title}</p>
+                <p className="text-xs text-gray-400">PKR {item.amount.toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => confirmRecurring(item)}
+                className="bg-yellow-600 hover:bg-yellow-500 text-white text-xs px-3 py-1.5 rounded-lg"
+              >
+                Add ✓
+              </button>
+              <button
+                onClick={() => setPendingRecurring(prev => prev.filter(p => p.id !== item.id))}
+                className="bg-gray-800 hover:bg-gray-700 text-gray-400 text-xs px-3 py-1.5 rounded-lg"
+              >
+                Skip
+              </button>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  </div>
+)}
+
+{/* Recurring expenses manager */}
+<div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="text-sm font-semibold text-gray-400">🔄 RECURRING EXPENSES</h2>
+    <button
+      onClick={() => setShowRecurringForm(!showRecurringForm)}
+      className="bg-gray-800 hover:bg-gray-700 text-white text-xs px-3 py-2 rounded-xl"
+    >
+      + Add
+    </button>
+  </div>
+
+  {/* Add form */}
+  {showRecurringForm && (
+    <div className="space-y-3 mb-5 p-4 bg-gray-800 rounded-xl">
+      <input
+        placeholder="Title (e.g. Hostel Rent)"
+        value={recurringForm.title}
+        onChange={e => setRecurringForm({ ...recurringForm, title: e.target.value })}
+        className="w-full bg-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm border border-gray-600"
+      />
+      <input
+        type="number"
+        placeholder="Amount in PKR"
+        value={recurringForm.amount}
+        onChange={e => setRecurringForm({ ...recurringForm, amount: e.target.value })}
+        className="w-full bg-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm border border-gray-600"
+      />
+      <select
+        value={recurringForm.category}
+        onChange={e => setRecurringForm({ ...recurringForm, category: e.target.value })}
+        className="w-full bg-gray-700 rounded-xl px-4 py-3 text-white text-sm border border-gray-600"
+      >
+        {CATEGORIES.map(c => (
+          <option key={c.name} value={c.name}>{c.icon} {c.name}</option>
+        ))}
+      </select>
+      <div className="flex items-center gap-2">
+        <span className="text-gray-400 text-sm">Due on day</span>
+        <input
+          type="number"
+          min={1} max={31}
+          value={recurringForm.day_of_month}
+          onChange={e => setRecurringForm({ ...recurringForm, day_of_month: parseInt(e.target.value) })}
+          className="bg-gray-700 rounded-xl px-3 py-2 text-white text-sm border border-gray-600 w-20"
+        />
+        <span className="text-gray-400 text-sm">of each month</span>
+      </div>
+      <div className="flex gap-2">
+        <button onClick={() => setShowRecurringForm(false)}
+          className="flex-1 bg-gray-700 rounded-xl py-2 text-gray-400 text-sm">Cancel</button>
+        <button onClick={addRecurring}
+          className="flex-1 bg-green-500 hover:bg-green-600 rounded-xl py-2 text-white text-sm font-semibold">Save</button>
+      </div>
+    </div>
+  )}
+
+  {/* Recurring list */}
+  {recurringExpenses.length === 0 ? (
+    <p className="text-gray-500 text-sm text-center py-4">
+      No recurring expenses yet. Add hostel rent, mobile data, subscriptions...
+    </p>
+  ) : (
+    <div className="space-y-3">
+      {recurringExpenses.map(item => {
+        const cat = CATEGORIES.find(c => c.name === item.category)
+        return (
+          <div key={item.id} className="flex items-center gap-3 py-2 border-b border-gray-800 last:border-0">
+            <span className="text-xl">{cat?.icon}</span>
+            <div className="flex-1">
+              <p className="text-sm font-medium">{item.title}</p>
+              <p className="text-xs text-gray-500">Due day {item.day_of_month} · PKR {item.amount.toLocaleString()}</p>
+            </div>
+            <button onClick={() => deleteRecurring(item.id)}
+              className="text-xs text-gray-600 hover:text-red-400">delete</button>
+          </div>
+        )
+      })}
+    </div>
+  )}
+</div>
       {/* Monthly History */}
       <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
         <h2 className="text-sm font-semibold text-gray-400 mb-4">MONTHLY HISTORY</h2>
