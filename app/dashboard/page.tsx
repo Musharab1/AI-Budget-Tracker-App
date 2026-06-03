@@ -166,6 +166,32 @@ const fetchAiRequestsLeft = async (userId: string) => {
     total: expenses.filter(e => e.category === cat.name).reduce((sum, e) => sum + e.amount, 0)
   })).filter(c => c.total > 0)
 
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+})
+const [historyExpenses, setHistoryExpenses] = useState<Expense[]>([])
+const [historyLoading, setHistoryLoading] = useState(false)
+
+const fetchHistoryExpenses = async (yearMonth: string) => {
+  setHistoryLoading(true)
+  const [year, month] = yearMonth.split('-')
+  const firstDay = `${year}-${month}-01`
+  const lastDay = new Date(parseInt(year), parseInt(month), 0)
+    .toISOString().split('T')[0]
+  
+  const { data } = await supabase
+    .from('expenses')
+    .select('*')
+    .eq('user_id', user.id)
+    .gte('date', firstDay)
+    .lte('date', lastDay)
+    .order('date', { ascending: false })
+  
+  if (data) setHistoryExpenses(data)
+  setHistoryLoading(false)
+}
+
   if (loading) return (
     <div className="min-h-screen bg-black flex items-center justify-center">
       <div className="text-white text-lg">Loading...</div>
@@ -481,10 +507,89 @@ const fetchAiRequestsLeft = async (userId: string) => {
           </div>
         </div>
       )}
-      <footer className="text-center text-sm text-gray-600 py-6 mt-4">
-        © {new Date().getFullYear()} Paisavo — Built for Pakistani students 🇵🇰
-      </footer>
-    </div>   
-  )
-}
+      {/* Monthly History */}
+      <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+        <h2 className="text-sm font-semibold text-gray-400 mb-4">MONTHLY HISTORY</h2>
+        
+        {/* Month picker */}
+        <div className="flex items-center gap-3 mb-5">
+          <button
+          onClick={() => {
+            const [y, m] = selectedMonth.split('-').map(Number)
+            const prev = new Date(y, m - 2)
+            const val = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`
+            setSelectedMonth(val)
+            fetchHistoryExpenses(val)
+          }}
+          className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-xl text-sm"
+          >←</button>
+          
+          <span className="flex-1 text-center font-semibold text-white">
+            {new Date(selectedMonth + '-01').toLocaleString('default', { month: 'long', year: 'numeric' })}
+            </span>
+            
+            <button
+            onClick={() => {
+              const [y, m] = selectedMonth.split('-').map(Number)
+              const next = new Date(y, m)
+              const val = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`
+              const now = new Date()
+              const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+              if (val <= currentMonth) {
+                setSelectedMonth(val)
+                fetchHistoryExpenses(val)
+              }
+            }}
+            className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-xl text-sm disabled:opacity-30"
+            >→</button>
+            </div>
+            
+            {/* Load button for initial state */}
+            {historyExpenses.length === 0 && !historyLoading && (
+              <button
+              onClick={() => fetchHistoryExpenses(selectedMonth)}
+              className="w-full bg-gray-800 hover:bg-gray-700 text-gray-400 text-sm py-3 rounded-xl"
+              >
+                Load {new Date(selectedMonth + '-01').toLocaleString('default', { month: 'long' })} expenses
+                </button>
+              )}
+              
+              {historyLoading && (
+                <p className="text-gray-500 text-sm text-center py-4">Loading...</p>
+                )}
+                
+                
+                {/* Expense list */}
+                {historyExpenses.length > 0 && !historyLoading && (
+                  <>
+                  <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-800">
+                    <span className="text-xs text-gray-500">{historyExpenses.length} expenses</span>
+                    <span className="text-sm font-bold text-white">
+                      PKR {historyExpenses.reduce((s, e) => s + e.amount, 0).toLocaleString()}
+                      </span>
+                      </div>
+                      <div className="space-y-3 max-h-80 overflow-y-auto">
+                        {historyExpenses.map(expense => {
+                          const cat = CATEGORIES.find(c => c.name === expense.category)
+                          return (
+                          <div key={expense.id} className="flex items-center gap-3 py-2 border-b border-gray-800 last:border-0">
+                            <span className="text-xl">{cat?.icon}</span>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">{expense.title}</p>
+                              <p className="text-xs text-gray-500">{expense.category} · {expense.date}</p>
+                              </div>
+                              <p className="text-sm font-semibold text-red-400">-PKR {expense.amount.toLocaleString()}</p>
+                              </div>
+                              )
+                              })}
+                              </div>
+                              </>
+                            )}
+                            </div>
+                            <footer className="text-center text-sm text-gray-600 py-6 mt-4">
+                              © {new Date().getFullYear()} Paisavo — Built for Pakistani students 🇵🇰
+                              </footer>
+                              </div>   
+                              )
+                            }
 
