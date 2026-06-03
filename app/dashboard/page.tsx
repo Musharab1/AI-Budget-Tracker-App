@@ -163,7 +163,10 @@ export default function Dashboard() {
       {/* Header */}
       <div className="bg-gray-900 border-b border-gray-800 px-4 py-4 flex justify-between items-center">
         <div>
-          <h1 className="text-lg font-bold">Paisavo 💰</h1>
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="Paisavo" className="w-8 h-8 object-contain rounded-full" />
+            <h1 className="text-lg font-bold">Paisavo</h1>
+            </div>
           <p className="text-gray-400 text-xs">
             {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
           </p>
