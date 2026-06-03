@@ -80,7 +80,7 @@ Give them a warm, friendly spending analysis in 3 parts:
 3. One encouraging sentence
 
 Keep it under 120 words. Write like a smart older sibling — warm, honest, never preachy. 
-Use simple English. Occasionally use "yaar" to feel relatable to Pakistani students.
+Use simple English. Do NOT use slang like "yaar" or other filler words.
 Always mention specific PKR amounts in your advice.`
 
     } else if (type === 'chat') {
@@ -95,9 +95,9 @@ Student's financial snapshot:
 Student's question: "${question}"
 
 Answer their question specifically using their actual spending data.
-Be warm, friendly, like a smart older sibling.
+Be warm and friendly, like a smart older sibling.
 Keep response under 100 words.
-Use simple English, occasionally use "yaar".
+Use simple English. Do NOT use slang like "yaar" or other filler words.
 Always give specific PKR amounts when relevant.`
 
     } else if (type === 'summary') {
@@ -113,7 +113,7 @@ Create a brief weekly summary with:
 2. Their top spending category and whether it's reasonable
 3. One specific saving tip for next week
 
-Keep it under 100 words. Warm, friendly tone. Use "yaar" occasionally.`
+Keep it under 100 words. Warm, friendly tone. Do NOT use slang like "yaar" or other filler words.`
 
     } else if (type === 'warning') {
       prompt = `You are a friendly financial advisor for Pakistani university students.
@@ -125,10 +125,10 @@ Student has used ${percentage}% of their monthly budget!
 - Breakdown: ${categoryText}
 
 Give ONE specific emergency saving tip they can implement RIGHT NOW.
-Keep it under 50 words. Be direct and friendly. Mention specific PKR amounts.`
+Keep it under 50 words. Be direct and friendly. Mention specific PKR amounts.
+Do NOT use slang like "yaar" or other filler words.`
 
     }
-    
 
     const completion = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
