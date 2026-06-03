@@ -1,7 +1,7 @@
 {
   "name": "Paisavo",
   "short_name": "Paisavo",
-  "description": "Smart money management for university students",
+  "description": "Smart expense tracker for Pakistani students",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

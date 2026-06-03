@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
+
 const CATEGORIES = [
   { name: 'Food', icon: '🍔', color: 'bg-orange-500' },
   { name: 'Transport', icon: '🚌', color: 'bg-blue-500' },
@@ -162,7 +163,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="bg-gray-900 border-b border-gray-800 px-4 py-4 flex justify-between items-center">
         <div>
-          <h1 className="text-lg font-bold"> Paisavo</h1>
+          <h1 className="text-lg font-bold">Paisavo 💰</h1>
           <p className="text-gray-400 text-xs">
             {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
           </p>
@@ -463,6 +464,10 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-    </div>
+      <footer className="text-center text-sm text-gray-600 py-6 mt-4">
+        © {new Date().getFullYear()} Paisavo — Built for Pakistani students 🇵🇰
+      </footer>
+    </div>   
   )
 }
+
