@@ -356,10 +356,15 @@ const saveBudget = async (budget: number) => {
               <div className="mt-4 flex items-center gap-2">
                 <span className="text-gray-400 text-sm">Monthly budget:</span>
                 <input type="number" value={monthlyBudget}
-                  onChange={(e) => {const val = Number(e.target.value)
+                  onChange={(e) => {
+                    const val = Number(e.target.value)
                     setMonthlyBudget(val)
-                    saveBudget(val)
                   }}
+                  onBlur={(e) => {
+                    const val = Number(e.target.value)
+                    if (val > 0) saveBudget(val)
+                      else setMonthlyBudget(15000) // reset to default if 0
+                    }}
                   className="bg-gray-800 text-white text-sm rounded-lg px-3 py-1 w-28 border border-gray-700" />
               </div>
             </div>
