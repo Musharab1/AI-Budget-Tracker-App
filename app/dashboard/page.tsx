@@ -308,6 +308,27 @@ export default function Dashboard() {
                 <span>{percentage.toFixed(0)}% used</span>
                 <span>Budget: PKR {monthlyBudget.toLocaleString()}</span>
               </div>
+              {/* Run out date prediction */}
+{totalSpent > 0 && (() => {
+  const now = new Date()
+  const daysElapsed = now.getDate()
+  const dailyRate = totalSpent / daysElapsed
+  const daysRemaining = remaining / dailyRate
+  const runOutDate = new Date(now.getTime() + daysRemaining * 24 * 60 * 60 * 1000)
+  const runOutDay = runOutDate.getDate()
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+
+  if (remaining <= 0) return null
+
+  return (
+    <div className={`mt-2 text-xs ${runOutDay < daysInMonth ? 'text-red-400' : 'text-green-400'}`}>
+      {runOutDay < daysInMonth
+        ? `⚡ At this rate you'll run out on ${runOutDate.toLocaleDateString('default', { month: 'short', day: 'numeric' })}`
+        : `✅ At this rate your budget will last the whole month`
+      }
+    </div>
+  )
+})()}
               {percentage > 80 && (
                 <div className="mt-3 bg-red-900/30 border border-red-800 rounded-xl p-3 text-red-400 text-sm">
                   ⚠️ You've used {percentage.toFixed(0)}% of your budget!
