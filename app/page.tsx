@@ -35,6 +35,18 @@ export default function LoginPage() {
   const supabase = createClient()
   const router = useRouter()
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [waitlistEmail, setWaitlistEmail] = useState('')
+const [waitlistLoading, setWaitlistLoading] = useState(false)
+const [waitlistDone, setWaitlistDone] = useState(false)
+
+const handleWaitlist = async () => {
+  if (!waitlistEmail || !waitlistEmail.includes('@')) return
+  setWaitlistLoading(true)
+  await supabase.from('email_waitlist').upsert({ email: waitlistEmail })
+  setWaitlistLoading(false)
+  setWaitlistDone(true)
+  setWaitlistEmail('')
+}
 
   useEffect(() => {
     const checkUser = async () => {
@@ -170,6 +182,27 @@ export default function LoginPage() {
           </button>
         </div>
       </section>
+
+      {/* Email capture */}
+<section className="relative z-10 max-w-xl mx-auto px-4 pb-16 text-center">
+  <p className="text-gray-400 text-sm mb-3">Get notified about new features 👇</p>
+  <div className="flex gap-2">
+    <input
+      type="email"
+      placeholder="your@email.com"
+      value={waitlistEmail}
+      onChange={e => setWaitlistEmail(e.target.value)}
+      className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-purple-500"
+    />
+    <button
+      onClick={handleWaitlist}
+      disabled={waitlistLoading || waitlistDone}
+      className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm px-5 py-3 rounded-xl font-semibold"
+    >
+      {waitlistDone ? '✅ Done' : waitlistLoading ? '...' : 'Notify me'}
+    </button>
+  </div>
+</section>
 
       {/* Footer */}
       <footer className="relative z-10 text-center text-gray-600 text-xs pb-10 px-4">
