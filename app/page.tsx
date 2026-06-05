@@ -1,45 +1,53 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { useState } from 'react'
 
 const features = [
   { icon: '📊', title: 'Track Every Rupee', desc: 'Log expenses in seconds with smart auto-categorization powered by AI.' },
   { icon: '🤖', title: 'AI Budget Coach', desc: 'Ask anything — "where am I overspending?" — and get real answers based on your data.' },
   { icon: '⚠️', title: 'Budget Warnings', desc: 'Get a friendly nudge before you overspend, not after. Stay ahead of your limits.' },
   { icon: '📱', title: 'Works on Android', desc: 'Install as an app on your phone. No app store needed — just open and add to home screen.' },
-  { icon: '🔐', title: 'Your Data, Only Yours', desc: 'Bank-level row security. Your expenses are completely private — even we can\'t see them.' },
+  { icon: '🔐', title: 'Your Data, Only Yours', desc: "Bank-level row security. Your expenses are completely private — even we can't see them." },
   { icon: '💡', title: 'Smart Categories', desc: 'Food, Transport, Shopping, Uni Supplies, Socializing — built around how students actually spend.' },
 ]
 
 const faqs = [
-  { q: '💸 What even IS Paisavo — and why should I care?', a: 'It\'s your personal money assistant, built specifically for students like you. Log your expenses, set a monthly budget, and let the AI tell you exactly where your money is disappearing before it\'s gone. Think of it as your financially responsible friend who never judges you for that third biryani order.' },
-  { q: '🍔 I spend most of my money on food. Will this actually help?', a: 'You and literally 61% of students we surveyed! The app tracks your food spending in real-time and warns you when you\'re going overboard — so you can decide whether that shawarma at midnight is really worth it. Spoiler: sometimes it is. We get it.' },
-  { q: '📊 I\'ve never tracked expenses before. Is this app for me?', a: '70% of students we surveyed don\'t track their expenses at all. That\'s exactly who this app is built for. No complicated spreadsheets, no financial jargon. Just open the app, tap a button, and you\'re done.' },
-  { q: '🤖 What does "AI advice" actually mean?', a: 'It means the app doesn\'t just show you numbers — it talks to you about them. Ask it "how can I save money this month?" and it\'ll give you a real answer based on your actual spending. Over 74% of surveyed students said they\'d use this feature.' },
-  { q: '🔐 Is my data actually safe?', a: 'Your data belongs to you, full stop. We use Supabase with Row Level Security — your expense data is completely isolated. No one else can see it, not even us. 74% of students rated data privacy a 9 or 10 out of 10 in importance. We heard you.' },
-  { q: '💰 My budget changes every month. Will the app still work?', a: '61% of students in our survey have irregular income — pocket money that varies, part-time gigs, or family top-ups. You can update your monthly budget anytime. Set it at the start of the month and adjust whenever things change.' },
-  { q: '🌐 Is the app available in Urdu?', a: 'Right now the interface is in English — which is what 73% of surveyed students preferred. But 27% wanted both English and Urdu, and we\'re listening. Bilingual support is on our roadmap. Watch this space!' },
-  { q: '🚀 How do I get started? Is it complicated?', a: 'Nope — it takes about 30 seconds. Tap "Continue with Google," log in, set your monthly budget, and you\'re live. No setup wizard, no tutorials required. Add your first expense and the app takes it from there.' },
+  { q: '💸 What even IS Paisavo — and why should I care?', a: "It's your personal money assistant, built specifically for students like you. Log your expenses, set a monthly budget, and let the AI tell you exactly where your money is disappearing before it's gone. Think of it as your financially responsible friend who never judges you for that third biryani order." },
+  { q: '🍔 I spend most of my money on food. Will this actually help?', a: "You and literally 61% of students we surveyed! The app tracks your food spending in real-time and warns you when you're going overboard — so you can decide whether that shawarma at midnight is really worth it. Spoiler: sometimes it is. We get it." },
+  { q: "📊 I've never tracked expenses before. Is this app for me?", a: "70% of students we surveyed don't track their expenses at all. That's exactly who this app is built for. No complicated spreadsheets, no financial jargon. Just open the app, tap a button, and you're done." },
+  { q: '🤖 What does "AI advice" actually mean?', a: "It means the app doesn't just show you numbers — it talks to you about them. Ask it \"how can I save money this month?\" and it'll give you a real answer based on your actual spending. Over 74% of surveyed students said they'd use this feature." },
+  { q: '🔐 Is my data actually safe?', a: "Your data belongs to you, full stop. We use Supabase with Row Level Security — your expense data is completely isolated. No one else can see it, not even us. 74% of students rated data privacy a 9 or 10 out of 10 in importance. We heard you." },
+  { q: '💰 My budget changes every month. Will the app still work?', a: "61% of students in our survey have irregular income — pocket money that varies, part-time gigs, or family top-ups. You can update your monthly budget anytime. Set it at the start of the month and adjust whenever things change." },
+  { q: '🌐 Is the app available in Urdu?', a: "Right now the interface is in English — which is what 73% of surveyed students preferred. But 27% wanted both English and Urdu, and we're listening. Bilingual support is on our roadmap. Watch this space!" },
+  { q: '🚀 How do I get started? Is it complicated?', a: "Nope — it takes about 30 seconds. Tap \"Continue with Google,\" log in, set your monthly budget, and you're live. No setup wizard, no tutorials required. Add your first expense and the app takes it from there." },
 ]
 
 const stats = [
   { value: '67', label: 'Students Surveyed' },
   { value: '74%', label: 'Want AI Advice' },
-  { value: '70%', label: 'Don\'t Track Expenses' },
+  { value: '70%', label: "Don't Track Expenses" },
   { value: '30s', label: 'To Get Started' },
 ]
 
 export default function LoginPage() {
   const supabase = createClient()
+  const router = useRouter()
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) router.push('/dashboard')
+    }
+    checkUser()
+  }, [])
 
   const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`
-      }
+      options: { redirectTo: `${window.location.origin}/auth/callback` }
     })
   }
 
@@ -59,10 +67,8 @@ export default function LoginPage() {
           <img src="/logo.png" alt="Paisavo" className="w-8 h-8 rounded-full object-cover" />
           <span className="text-lg font-bold tracking-tight">Paisavo</span>
         </div>
-        <button
-          onClick={handleGoogleLogin}
-          className="text-sm bg-white/10 hover:bg-white/20 border border-white/10 px-4 py-2 rounded-full transition-all"
-        >
+        <button onClick={handleGoogleLogin}
+          className="text-sm bg-white/10 hover:bg-white/20 border border-white/10 px-4 py-2 rounded-full transition-all">
           Sign in
         </button>
       </nav>
@@ -73,7 +79,6 @@ export default function LoginPage() {
           <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" />
           Built for Pakistani university students
         </div>
-
         <h1 className="text-5xl sm:text-7xl font-black tracking-tight leading-none mb-6">
           Stop wondering
           <br />
@@ -81,15 +86,11 @@ export default function LoginPage() {
             where it went.
           </span>
         </h1>
-
         <p className="text-gray-400 text-lg sm:text-xl max-w-xl mx-auto mb-10 leading-relaxed">
           Paisavo tracks your spending, warns you before you overspend, and gives you AI-powered advice — all in 30 seconds setup.
         </p>
-
-        <button
-          onClick={handleGoogleLogin}
-          className="inline-flex items-center gap-3 bg-white text-black font-semibold px-8 py-4 rounded-2xl hover:scale-105 transition-transform text-base shadow-2xl shadow-white/10"
-        >
+        <button onClick={handleGoogleLogin}
+          className="inline-flex items-center gap-3 bg-white text-black font-semibold px-8 py-4 rounded-2xl hover:scale-105 transition-transform text-base shadow-2xl shadow-white/10">
           <svg width="20" height="20" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -98,11 +99,10 @@ export default function LoginPage() {
           </svg>
           Continue with Google — it's free
         </button>
-
         <p className="text-gray-600 text-xs mt-4">No credit card. No setup. Just Google login.</p>
       </section>
 
-      {/* Stats bar */}
+      {/* Stats */}
       <section className="relative z-10 max-w-4xl mx-auto px-4 pb-24">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {stats.map((s) => (
@@ -139,21 +139,14 @@ export default function LoginPage() {
         </div>
         <div className="space-y-3">
           {faqs.map((faq, i) => (
-            <div
-              key={i}
-              className="bg-white/4 border border-white/8 rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all"
-            >
-              <button
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                className="w-full text-left px-6 py-5 flex items-center justify-between gap-4"
-              >
+            <div key={i} className="bg-white/4 border border-white/8 rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all">
+              <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="w-full text-left px-6 py-5 flex items-center justify-between gap-4">
                 <span className="font-semibold text-sm sm:text-base text-white">{faq.q}</span>
                 <span className={`text-purple-400 text-xl flex-shrink-0 transition-transform duration-200 ${openFaq === i ? 'rotate-45' : ''}`}>+</span>
               </button>
               {openFaq === i && (
-                <div className="px-6 pb-5 text-gray-400 text-sm leading-relaxed border-t border-white/8 pt-4">
-                  {faq.a}
-                </div>
+                <div className="px-6 pb-5 text-gray-400 text-sm leading-relaxed border-t border-white/8 pt-4">{faq.a}</div>
               )}
             </div>
           ))}
@@ -165,10 +158,8 @@ export default function LoginPage() {
         <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border border-purple-500/20 rounded-3xl p-10">
           <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-4">Ready to take control?</h2>
           <p className="text-gray-400 mb-8">Join students across Pakistan who are finally tracking their money.</p>
-          <button
-            onClick={handleGoogleLogin}
-            className="inline-flex items-center gap-3 bg-white text-black font-semibold px-8 py-4 rounded-2xl hover:scale-105 transition-transform text-base"
-          >
+          <button onClick={handleGoogleLogin}
+            className="inline-flex items-center gap-3 bg-white text-black font-semibold px-8 py-4 rounded-2xl hover:scale-105 transition-transform text-base">
             <svg width="20" height="20" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
