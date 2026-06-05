@@ -75,6 +75,7 @@ export default function Dashboard() {
       await fetchExpenses(user.id)
       await fetchAiRequestsLeft(user.id)
       await fetchRecurringExpenses(user.id)
+      await fetchBudget(user.id)  
       setLoading(false)
     }
     getUser()
@@ -98,6 +99,20 @@ export default function Dashboard() {
     setAiRequestsLeft(Math.max(0, 5 - (data?.count || 0)))
   }
 
+  const fetchBudget = async (userId: string) => {
+  const { data } = await supabase
+    .from('user_settings')
+    .select('monthly_budget')
+    .eq('user_id', userId)
+    .single()
+  if (data) setMonthlyBudget(data.monthly_budget)
+}
+
+const saveBudget = async (budget: number) => {
+  await supabase
+    .from('user_settings')
+    .upsert({ user_id: user.id, monthly_budget: budget, updated_at: new Date().toISOString() })
+}
   const fetchRecurringExpenses = async (userId: string) => {
     const { data } = await supabase
       .from('recurring_expenses').select('*').eq('user_id', userId).eq('is_active', true)
@@ -341,7 +356,10 @@ export default function Dashboard() {
               <div className="mt-4 flex items-center gap-2">
                 <span className="text-gray-400 text-sm">Monthly budget:</span>
                 <input type="number" value={monthlyBudget}
-                  onChange={e => setMonthlyBudget(Number(e.target.value))}
+                  onChange={(e) => {const val = Number(e.target.value)
+                    setMonthlyBudget(val)
+                    saveBudget(val)
+                  }}
                   className="bg-gray-800 text-white text-sm rounded-lg px-3 py-1 w-28 border border-gray-700" />
               </div>
             </div>
